@@ -11,18 +11,26 @@ class Window(QWidget):
   def __init__(self):
     super().__init__()
 
+    self.index = 0
     self.img = QPixmap("steve.png")
     self.setGeometry(0, 0, 500, 300)
     self.setWindowTitle("Fuck")
 
     timer = QTimer(self)
-    timer.timeout.connect(self.update)
-    timer.start(1000)
+    timer.timeout.connect(self.incAndUpdate)
+    timer.start(100)
 
   def paintEvent(self, evt):
-    print("paint called!!")
     painter = QPainter(self)
-    painter.drawPixmap(0, 0, self.img)
+    painter.drawPixmap(0, 0, self.img, self.index * 80, 0, 80, 80)
+
+  def incAndUpdate(self):
+    if self.index == 3:
+      self.index = 0
+    else:
+      self.index += 1
+
+    self.update()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
