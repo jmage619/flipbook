@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
+from PyQt5.QtCore import QTimer
 
 class Window(QWidget):
   def __init__(self):
@@ -14,7 +15,12 @@ class Window(QWidget):
     self.setGeometry(0, 0, 500, 300)
     self.setWindowTitle("Fuck")
 
+    timer = QTimer(self)
+    timer.timeout.connect(self.update)
+    timer.start(1000)
+
   def paintEvent(self, evt):
+    print("paint called!!")
     painter = QPainter(self)
     painter.drawPixmap(0, 0, self.img)
 
