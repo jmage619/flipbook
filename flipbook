@@ -17,7 +17,6 @@ class Window(QWidget):
     self.index = 0
     #self.img = QPixmap("steve.png")
     renderer = QSvgRenderer("steve.svg", self)
-    print(renderer.defaultSize())
     self.img = QPixmap(renderer.defaultSize())
     self.img.fill(Qt.transparent)
     painter = QPainter(self.img)
