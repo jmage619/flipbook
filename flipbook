@@ -3,6 +3,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import QTimer
@@ -10,27 +11,30 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgRenderer
 
-class Window(QWidget):
+class Animation(QWidget):
   def __init__(self):
     super().__init__()
-
-    self.index = 0
+    self.renderer = QSvgRenderer(self)
+    self.path = None
     #self.img = QPixmap("steve.png")
-    renderer = QSvgRenderer("steve.svg", self)
-    self.img = QPixmap(renderer.defaultSize())
+    self.img = None
+    self.index = 0
+    self.timer = QTimer(self)
+    self.timer.timeout.connect(self.incAndUpdate)
+
+  # assume svg for now
+  def load(self, path):
+    self.path = path
+    self.renderer.load(path)
+    self.img = QPixmap(self.renderer.defaultSize())
     self.img.fill(Qt.transparent)
     painter = QPainter(self.img)
-    renderer.render(painter, QRectF(self.img.rect()))
-    self.setGeometry(0, 0, 500, 300)
-    self.setWindowTitle("Fuck")
-
-    timer = QTimer(self)
-    timer.timeout.connect(self.incAndUpdate)
-    timer.start(100)
+    self.renderer.render(painter, QRectF(self.img.rect()))
 
   def paintEvent(self, evt):
-    painter = QPainter(self)
-    painter.drawPixmap(0, 0, self.img, self.index * 80, 0, 80, 80)
+    if self.img is not None:
+      painter = QPainter(self)
+      painter.drawPixmap(0, 0, self.img, self.index * 80, 0, 80, 80)
 
   def incAndUpdate(self):
     if self.index == 3:
@@ -39,6 +43,22 @@ class Window(QWidget):
       self.index += 1
 
     self.update()
+
+class Window(QWidget):
+  def __init__(self):
+    super().__init__()
+
+    self.setGeometry(0, 0, 500, 300)
+    self.setWindowTitle("Fuck")
+
+    vbox = QVBoxLayout()
+
+    animation = Animation()
+    vbox.addWidget(animation)
+    self.setLayout(vbox)
+
+    animation.load('steve.svg')
+    animation.timer.start(100)
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
