@@ -6,13 +6,22 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QRectF
+from PyQt5.QtCore import Qt
+from PyQt5.QtSvg import QSvgRenderer
 
 class Window(QWidget):
   def __init__(self):
     super().__init__()
 
     self.index = 0
-    self.img = QPixmap("steve.png")
+    #self.img = QPixmap("steve.png")
+    renderer = QSvgRenderer("steve.svg", self)
+    print(renderer.defaultSize())
+    self.img = QPixmap(renderer.defaultSize())
+    self.img.fill(Qt.transparent)
+    painter = QPainter(self.img)
+    renderer.render(painter, QRectF(self.img.rect()))
     self.setGeometry(0, 0, 500, 300)
     self.setWindowTitle("Fuck")
 
