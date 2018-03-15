@@ -80,9 +80,9 @@ class LoadDialog(QDialog):
     hbox.addStretch()
     label = QLabel('row count:')
     hbox.addWidget(label)
-    textbox = QLineEdit()
-    textbox.setMaximumWidth(40)
-    hbox.addWidget(textbox)
+    self.row_box = QLineEdit()
+    self.row_box.setMaximumWidth(40)
+    hbox.addWidget(self.row_box)
     vbox.addLayout(hbox)
 
     # max frame
@@ -90,9 +90,9 @@ class LoadDialog(QDialog):
     hbox.addStretch()
     label = QLabel('max frame:')
     hbox.addWidget(label)
-    textbox = QLineEdit()
-    textbox.setMaximumWidth(40)
-    hbox.addWidget(textbox)
+    self.frame_box = QLineEdit()
+    self.frame_box.setMaximumWidth(40)
+    hbox.addWidget(self.frame_box)
     vbox.addLayout(hbox)
 
     # ok cancel buttons
@@ -108,6 +108,10 @@ class LoadDialog(QDialog):
     if path != "":
       self.file_box.setText(path)
 
+  # no validation whatsoever right now
+  def getValues(self):
+    return (self.file_box.text(), int(self.row_box.text()), int(self.frame_box.text()))
+
 class Window(QWidget):
   def __init__(self):
     super().__init__()
@@ -117,8 +121,8 @@ class Window(QWidget):
 
     vbox = QVBoxLayout()
 
-    animation = Animation()
-    vbox.addWidget(animation)
+    self.animation = Animation()
+    vbox.addWidget(self.animation)
 
     hbox = QHBoxLayout()
     hbox.addStretch()
@@ -127,15 +131,15 @@ class Window(QWidget):
     vbox.addLayout(hbox)
     self.setLayout(vbox)
 
-    animation.load('steve.svg', 4, 8)
-    animation.nframes = 4
-    animation.timer.start(100)
+    self.animation.nframes = 4
+    self.animation.timer.start(100)
 
     load_button.clicked.connect(self.launchLoad)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
-    dialog.exec()
+    if dialog.exec() == QDialog.Accepted:
+      self.animation.load(*dialog.getValues())
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
