@@ -3,7 +3,14 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QHBoxLayout
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import QTimer
@@ -53,6 +60,54 @@ class Animation(QWidget):
 
     self.update()
 
+class LoadDialog(QDialog):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+
+    # file selection
+    vbox = QVBoxLayout()
+    hbox = QHBoxLayout()
+    self.file_box = QLineEdit('<choose>')
+    self.file_box.setReadOnly(True)
+    self.file_box.setMinimumWidth(300)
+    hbox.addWidget(self.file_box)
+    file_button = QPushButton('file')
+    hbox.addWidget(file_button)
+    vbox.addLayout(hbox)
+
+    # row count
+    hbox = QHBoxLayout()
+    hbox.addStretch()
+    label = QLabel('row count:')
+    hbox.addWidget(label)
+    textbox = QLineEdit()
+    textbox.setMaximumWidth(40)
+    hbox.addWidget(textbox)
+    vbox.addLayout(hbox)
+
+    # max frame
+    hbox = QHBoxLayout()
+    hbox.addStretch()
+    label = QLabel('max frame:')
+    hbox.addWidget(label)
+    textbox = QLineEdit()
+    textbox.setMaximumWidth(40)
+    hbox.addWidget(textbox)
+    vbox.addLayout(hbox)
+
+    # ok cancel buttons
+    buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+    vbox.addWidget(buttons)
+    self.setLayout(vbox)
+    buttons.accepted.connect(self.accept)
+    buttons.rejected.connect(self.reject)
+    file_button.clicked.connect(self.selectFile)
+
+  def selectFile(self):
+    path = QFileDialog.getOpenFileName(self, "Open Spriteheet", "", "Sprite Sheets (*.svg)")[0]
+    if path != "":
+      self.file_box.setText(path)
+
 class Window(QWidget):
   def __init__(self):
     super().__init__()
@@ -64,11 +119,23 @@ class Window(QWidget):
 
     animation = Animation()
     vbox.addWidget(animation)
+
+    hbox = QHBoxLayout()
+    hbox.addStretch()
+    load_button = QPushButton("Load")
+    hbox.addWidget(load_button)
+    vbox.addLayout(hbox)
     self.setLayout(vbox)
 
     animation.load('steve.svg', 4, 8)
     animation.nframes = 4
     animation.timer.start(100)
+
+    load_button.clicked.connect(self.launchLoad)
+
+  def launchLoad(self):
+    dialog = LoadDialog(self)
+    dialog.exec()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
