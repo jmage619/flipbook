@@ -61,6 +61,14 @@ class Animation(QWidget):
 
     self.update()
 
+  def decAndUpdate(self):
+    if self.index == 0:
+      self.index = self.nframes - 1
+    else:
+      self.index -= 1
+
+    self.update()
+
 class LoadDialog(QDialog):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
@@ -122,8 +130,12 @@ class Window(QWidget):
     self.animation = Animation()
     vbox.addWidget(self.animation)
 
+    hbox = QHBoxLayout()
+    hbox.addStretch()
     load_button = QPushButton("Load")
-    vbox.addWidget(load_button)
+    hbox.addWidget(load_button)
+
+    vbox.addLayout(hbox)
 
     hbox = QHBoxLayout()
 
@@ -145,6 +157,7 @@ class Window(QWidget):
 
     load_button.clicked.connect(self.launchLoad)
     self.play_button.toggled.connect(self.play)
+    self.prev_button.clicked.connect(self.prev_frame)
     self.next_button.clicked.connect(self.next_frame)
 
   def launchLoad(self):
@@ -162,6 +175,9 @@ class Window(QWidget):
 
   def next_frame(self):
     self.animation.incAndUpdate()
+
+  def prev_frame(self):
+    self.animation.decAndUpdate()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
