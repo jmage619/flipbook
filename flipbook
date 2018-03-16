@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtWidgets import QDialogButtonBox
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QSpinBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import QTimer
@@ -138,6 +139,21 @@ class Window(QWidget):
     vbox.addLayout(hbox)
 
     hbox = QHBoxLayout()
+    hbox.addStretch()
+    label = QLabel()
+    label.setText('frame length (ms):')
+    hbox.addWidget(label)
+
+    self.speed_box = QSpinBox()
+    self.speed_box.setMinimum(10)
+    self.speed_box.setMaximum(1000)
+    self.speed_box.setValue(100)
+    self.speed_box.setSingleStep(10)
+    hbox.addWidget(self.speed_box)
+
+    vbox.addLayout(hbox)
+
+    hbox = QHBoxLayout()
 
     self.play_button = QPushButton("Play")
     self.play_button.setCheckable(True)
@@ -157,8 +173,9 @@ class Window(QWidget):
 
     load_button.clicked.connect(self.launchLoad)
     self.play_button.toggled.connect(self.play)
-    self.prev_button.clicked.connect(self.prev_frame)
-    self.next_button.clicked.connect(self.next_frame)
+    self.prev_button.clicked.connect(self.prevFrame)
+    self.next_button.clicked.connect(self.nextFrame)
+    self.speed_box.valueChanged.connect(self.updateSpeed)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
@@ -167,17 +184,21 @@ class Window(QWidget):
 
   def play(self, playing):
     if playing:
-      self.animation.timer.start(100)
+      self.animation.timer.start(self.speed_box.value())
       self.play_button.setText("Stop")
     else:
       self.animation.timer.stop()
       self.play_button.setText("Play")
 
-  def next_frame(self):
+  def nextFrame(self):
     self.animation.incAndUpdate()
 
-  def prev_frame(self):
+  def prevFrame(self):
     self.animation.decAndUpdate()
+
+  def updateSpeed(self, val):
+    if self.animation.timer.isActive():
+      self.animation.timer.start(val)
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
