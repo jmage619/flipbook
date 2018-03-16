@@ -125,9 +125,19 @@ class Window(QWidget):
     load_button = QPushButton("Load")
     vbox.addWidget(load_button)
 
+    hbox = QHBoxLayout()
+
     self.play_button = QPushButton("Play")
     self.play_button.setCheckable(True)
-    vbox.addWidget(self.play_button)
+    hbox.addWidget(self.play_button)
+
+    self.prev_button = QPushButton("<")
+    hbox.addWidget(self.prev_button)
+
+    self.next_button = QPushButton(">")
+    hbox.addWidget(self.next_button)
+
+    vbox.addLayout(hbox)
 
     self.setLayout(vbox)
 
@@ -135,6 +145,7 @@ class Window(QWidget):
 
     load_button.clicked.connect(self.launchLoad)
     self.play_button.toggled.connect(self.play)
+    self.next_button.clicked.connect(self.next_frame)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
@@ -148,6 +159,9 @@ class Window(QWidget):
     else:
       self.animation.timer.stop()
       self.play_button.setText("Play")
+
+  def next_frame(self):
+    self.animation.incAndUpdate()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
