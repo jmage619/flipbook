@@ -34,6 +34,7 @@ class Animation(QWidget):
     self.cell_h = -1
     self.timer = QTimer(self)
     self.timer.timeout.connect(self.incAndUpdate)
+    self.setMinimumSize(200, 200)
 
   # assume svg for now
   def load(self, path, nrows, max_frames):
@@ -88,7 +89,7 @@ class LoadDialog(QDialog):
     # max frame
     hbox = QHBoxLayout()
     hbox.addStretch()
-    label = QLabel('max frame:')
+    label = QLabel('max frames:')
     hbox.addWidget(label)
     self.frame_box = QLineEdit()
     self.frame_box.setMaximumWidth(40)
@@ -116,30 +117,37 @@ class Window(QWidget):
   def __init__(self):
     super().__init__()
 
-    self.setGeometry(0, 0, 500, 300)
-    self.setWindowTitle("Fuck")
-
     vbox = QVBoxLayout()
 
     self.animation = Animation()
     vbox.addWidget(self.animation)
 
-    hbox = QHBoxLayout()
-    hbox.addStretch()
     load_button = QPushButton("Load")
-    hbox.addWidget(load_button)
-    vbox.addLayout(hbox)
+    vbox.addWidget(load_button)
+
+    self.play_button = QPushButton("Play")
+    self.play_button.setCheckable(True)
+    vbox.addWidget(self.play_button)
+
     self.setLayout(vbox)
 
     self.animation.nframes = 4
-    self.animation.timer.start(100)
 
     load_button.clicked.connect(self.launchLoad)
+    self.play_button.toggled.connect(self.play)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
     if dialog.exec() == QDialog.Accepted:
       self.animation.load(*dialog.getValues())
+
+  def play(self, playing):
+    if playing:
+      self.animation.timer.start(100)
+      self.play_button.setText("Stop")
+    else:
+      self.animation.timer.stop()
+      self.play_button.setText("Play")
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
