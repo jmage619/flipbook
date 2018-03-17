@@ -37,6 +37,12 @@ class Animation(QWidget):
     self.timer.timeout.connect(self.incAndUpdate)
     self.setMinimumHeight(200)
 
+  def paintEvent(self, evt):
+    if self.img is not None:
+      painter = QPainter(self)
+      painter.drawPixmap(0, 0, self.img, self.index * self.cell_w,
+        self.cur_row * self.cell_h, self.cell_w, self.cell_h)
+
   def loadImg(self):
     self.renderer.load(self.path)
     self.img = QPixmap(self.renderer.defaultSize())
@@ -54,11 +60,26 @@ class Animation(QWidget):
     self.cell_w = self.img.width() / max_frames
     self.cell_h = self.img.height() / nrows
 
-  def paintEvent(self, evt):
-    if self.img is not None:
-      painter = QPainter(self)
-      painter.drawPixmap(0, 0, self.img, self.index * self.cell_w,
-        self.cur_row * self.cell_h, self.cell_w, self.cell_h)
+  def reload(self):
+    self.loadImg()
+    self.update()
+
+  def updateRow(self, val):
+    self.cur_row = val
+    self.update()
+
+  def updateFrameCount(self, val):
+    self.nframes = val
+
+  def updateSpeed(self, val):
+    if self.timer.isActive():
+      self.timer.start(val)
+
+  def play(self, speed):
+    self.timer.start(speed)
+
+  def stop(self):
+    self.timer.stop()
 
   def incAndUpdate(self):
     if self.index >= self.nframes - 1:
@@ -208,13 +229,13 @@ class Window(QWidget):
     self.setLayout(vbox)
 
     load_button.clicked.connect(self.launchLoad)
-    reload_button.clicked.connect(self.reload)
-    self.row_box.valueChanged.connect(self.updateRow)
-    self.nframe_box.valueChanged.connect(self.updateFrameCount)
-    self.speed_box.valueChanged.connect(self.updateSpeed)
+    reload_button.clicked.connect(self.animation.reload)
+    self.row_box.valueChanged.connect(self.animation.updateRow)
+    self.nframe_box.valueChanged.connect(self.animation.updateFrameCount)
+    self.speed_box.valueChanged.connect(self.animation.updateSpeed)
     self.play_button.toggled.connect(self.play)
-    self.prev_button.clicked.connect(self.prevFrame)
-    self.next_button.clicked.connect(self.nextFrame)
+    self.prev_button.clicked.connect(self.animation.incAndUpdate)
+    self.next_button.clicked.connect(self.animation.decAndUpdate)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
@@ -225,34 +246,13 @@ class Window(QWidget):
       self.nframe_box.setMaximum(values[2])
       self.nframe_box.setValue(values[2])
 
-  def reload(self):
-    self.animation.loadImg()
-    self.animation.update()
-
-  def updateRow(self, val):
-    self.animation.cur_row = val
-    self.animation.update()
-
-  def updateFrameCount(self, val):
-    self.animation.nframes = val
-
-  def updateSpeed(self, val):
-    if self.animation.timer.isActive():
-      self.animation.timer.start(val)
-
   def play(self, playing):
     if playing:
-      self.animation.timer.start(self.speed_box.value())
+      self.animation.play(self.speed_box.value())
       self.play_button.setText("Stop")
     else:
-      self.animation.timer.stop()
+      self.animation.stop()
       self.play_button.setText("Play")
-
-  def nextFrame(self):
-    self.animation.incAndUpdate()
-
-  def prevFrame(self):
-    self.animation.decAndUpdate()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
