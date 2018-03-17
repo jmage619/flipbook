@@ -151,9 +151,20 @@ class Window(QWidget):
     hbox.addWidget(reload_button)
     vbox.addLayout(hbox)
 
-    # nframe box
     hbox = QHBoxLayout()
     hbox.addStretch()
+
+    # row box
+    label = QLabel()
+    label.setText('row:')
+    hbox.addWidget(label)
+    self.row_box = QSpinBox()
+    self.row_box.setMinimum(0)
+    self.row_box.setValue(0)
+    self.row_box.setMinimumWidth(70)
+    hbox.addWidget(self.row_box)
+
+    # nframe box
     label = QLabel()
     label.setText('n frames:')
     hbox.addWidget(label)
@@ -197,6 +208,7 @@ class Window(QWidget):
 
     load_button.clicked.connect(self.launchLoad)
     reload_button.clicked.connect(self.reload)
+    self.row_box.valueChanged.connect(self.updateRow)
     self.nframe_box.valueChanged.connect(self.updateFrameCount)
     self.speed_box.valueChanged.connect(self.updateSpeed)
     self.play_button.toggled.connect(self.play)
@@ -208,12 +220,24 @@ class Window(QWidget):
     if dialog.exec() == QDialog.Accepted:
       values = dialog.getValues()
       self.animation.load(*values)
+      self.row_box.setMaximum(values[1])
       self.nframe_box.setMaximum(values[2])
       self.nframe_box.setValue(values[2])
 
   def reload(self):
     self.animation.loadImg()
     self.animation.update()
+
+  def updateRow(self, val):
+    self.animation.cur_row = val
+    self.animation.update()
+
+  def updateFrameCount(self, val):
+    self.animation.nframes = val
+
+  def updateSpeed(self, val):
+    if self.animation.timer.isActive():
+      self.animation.timer.start(val)
 
   def play(self, playing):
     if playing:
@@ -228,13 +252,6 @@ class Window(QWidget):
 
   def prevFrame(self):
     self.animation.decAndUpdate()
-
-  def updateSpeed(self, val):
-    if self.animation.timer.isActive():
-      self.animation.timer.start(val)
-
-  def updateFrameCount(self, val):
-    self.animation.nframes = val
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
