@@ -35,7 +35,7 @@ class Animation(QWidget):
     self.cell_h = -1
     self.timer = QTimer(self)
     self.timer.timeout.connect(self.incAndUpdate)
-    self.setMinimumSize(200, 200)
+    self.setMinimumHeight(200)
 
   def loadImg(self):
     self.renderer.load(self.path)
@@ -192,6 +192,7 @@ class Window(QWidget):
 
     # play left and right buttons
     hbox = QHBoxLayout()
+    hbox.addStretch()
     self.play_button = QPushButton("Play")
     self.play_button.setCheckable(True)
     hbox.addWidget(self.play_button)
