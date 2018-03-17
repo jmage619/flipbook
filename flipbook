@@ -37,16 +37,19 @@ class Animation(QWidget):
     self.timer.timeout.connect(self.incAndUpdate)
     self.setMinimumSize(200, 200)
 
+  def loadImg(self):
+    self.renderer.load(self.path)
+    self.img = QPixmap(self.renderer.defaultSize())
+    self.img.fill(Qt.transparent)
+    painter = QPainter(self.img)
+    self.renderer.render(painter, QRectF(self.img.rect()))
+
   # assume svg for now
   def load(self, path, nrows, max_frames):
     self.nrows = nrows
     self.max_frames = max_frames
     self.path = path
-    self.renderer.load(path)
-    self.img = QPixmap(self.renderer.defaultSize())
-    self.img.fill(Qt.transparent)
-    painter = QPainter(self.img)
-    self.renderer.render(painter, QRectF(self.img.rect()))
+    self.loadImg()
 
     self.cell_w = self.img.width() / max_frames
     self.cell_h = self.img.height() / nrows
@@ -139,11 +142,13 @@ class Window(QWidget):
     self.animation = Animation()
     vbox.addWidget(self.animation)
 
-    # load button
+    # load and reload buttons
     hbox = QHBoxLayout()
     hbox.addStretch()
     load_button = QPushButton("Load")
     hbox.addWidget(load_button)
+    reload_button = QPushButton("Reload")
+    hbox.addWidget(reload_button)
     vbox.addLayout(hbox)
 
     # nframe box
@@ -191,6 +196,7 @@ class Window(QWidget):
     self.setLayout(vbox)
 
     load_button.clicked.connect(self.launchLoad)
+    reload_button.clicked.connect(self.reload)
     self.nframe_box.valueChanged.connect(self.updateFrameCount)
     self.speed_box.valueChanged.connect(self.updateSpeed)
     self.play_button.toggled.connect(self.play)
@@ -204,6 +210,10 @@ class Window(QWidget):
       self.animation.load(*values)
       self.nframe_box.setMaximum(values[2])
       self.nframe_box.setValue(values[2])
+
+  def reload(self):
+    self.animation.loadImg()
+    self.animation.update()
 
   def play(self, playing):
     if playing:
