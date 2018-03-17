@@ -242,7 +242,7 @@ class Window(QWidget):
     if dialog.exec() == QDialog.Accepted:
       values = dialog.getValues()
       self.animation.load(*values)
-      self.row_box.setMaximum(values[1])
+      self.row_box.setMaximum(values[1] - 1)
       self.nframe_box.setMaximum(values[2])
       self.nframe_box.setValue(values[2])
 
