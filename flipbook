@@ -234,8 +234,8 @@ class Window(QWidget):
     self.nframe_box.valueChanged.connect(self.animation.updateFrameCount)
     self.speed_box.valueChanged.connect(self.animation.updateSpeed)
     self.play_button.toggled.connect(self.play)
-    self.prev_button.clicked.connect(self.animation.incAndUpdate)
-    self.next_button.clicked.connect(self.animation.decAndUpdate)
+    self.prev_button.clicked.connect(self.animation.decAndUpdate)
+    self.next_button.clicked.connect(self.animation.incAndUpdate)
 
   def launchLoad(self):
     dialog = LoadDialog(self)
